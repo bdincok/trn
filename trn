@@ -13,7 +13,6 @@ st.set_page_config(
 # --- Kurumsal Lufthansa Teması & Modern CSS ---
 st.markdown("""
 <style>
-    /* Lufthansa Renk Paleti: Lacivert #05164D, Havacılık Sarısı #FFAC00 */
     :root {
         --lh-navy: #05164D;
         --lh-yellow: #FFAC00;
@@ -68,23 +67,17 @@ st.markdown("""
         color: #05164D;
         margin-top: 4px;
     }
-    
-    .status-badge {
-        display: inline-block;
-        padding: 4px 10px;
-        border-radius: 20px;
-        font-size: 0.78rem;
-        font-weight: 600;
-    }
-    
-    .badge-devam { background-color: #E0F2FE; color: #0369A1; }
-    .badge-uygun { background-color: #DCFCE7; color: #15803D; }
-    .badge-release { background-color: #FEF3C7; color: #B45309; }
-    .badge-aksiyon { background-color: #FEE2E2; color: #B91C1C; }
 </style>
 """, unsafe_allow_html=True)
 
-# --- Örnek Veri Seti (Session State Başlatma) ---
+# Güvenli Rerun Fonksiyonu (Eski ve yeni streamlit sürümlerini destekler)
+def trigger_rerun():
+    try:
+        st.rerun()
+    except Exception:
+        st.experimental_rerun()
+
+# --- Örnek Veri Seti (Session State) ---
 if "trn_data" not in st.session_state:
     bugun = date.today()
     st.session_state.trn_data = [
@@ -134,7 +127,7 @@ if "trn_data" not in st.session_state:
         }
     ]
 
-# --- Yardımcı Fonksiyonlar ---
+# --- Tablo Verisi Hazırlama ---
 def get_df():
     records = []
     bugun = date.today()
@@ -152,8 +145,7 @@ def get_df():
             "Geçen Süre (Gün)": gecen_gun,
             "60 Gün Hedefi": hedef_tarih.strftime("%d.%m.%Y"),
             "Kalan Gün": kalan_gun,
-            "Durum": item["durum"],
-            "_raw_item": item
+            "Durum": item["durum"]
         })
     return pd.DataFrame(records)
 
@@ -163,7 +155,7 @@ df_all = get_df()
 st.markdown("""
 <div class="main-header">
     <div>
-        <h1>✈️ Lufthansa TRN Takip ve Operasyon Portalı</h1>
+        <h1>✈️️ Lufthansa TRN Takip ve Operasyon Portalı</h1>
         <p>Kontuar Yolcu Hizmetleri Yetiştirme ve 60 Günlük Release Takip Sistemi</p>
     </div>
     <div style="background: #FFAC00; color: #05164D; padding: 6px 14px; border-radius: 20px; font-weight: 700; font-size: 0.85rem;">
@@ -172,7 +164,7 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# --- KPI Metrik Kartları ---
+# --- KPI Kartları ---
 kpi1, kpi2, kpi3, kpi4 = st.columns(4)
 
 total_menti = len(df_all)
@@ -191,14 +183,14 @@ with kpi4:
 
 st.write("")
 
-# --- Sekmeler: Ana Görünüm & Yönetim ---
+# --- Sekmeler ---
 tab_liste, tab_yeni, tab_degerlendirme = st.tabs([
     "📋 TRN Takip ve Liste",
     "➕ Yeni Personel Girişi",
     "✍️ Mentor Değerlendirme & Release"
 ])
 
-# ----------------- SEKME 1: LİSTE VE FİLTRELEME -----------------
+# 1. SEKME: LİSTE
 with tab_liste:
     col_search, col_filter, col_toggle = st.columns([2, 1.5, 1])
     
@@ -213,9 +205,8 @@ with tab_liste:
     with col_toggle:
         st.write("")
         st.write("")
-        sadece_aksiyon = st.toggle("Yalnızca Aksiyon Gerekenler", value=False)
+        sadece_aksiyon = st.checkbox("Yalnızca Aksiyon Gerekenler", value=False)
 
-    # Filtreleme mantığı
     filtered_df = df_all.copy()
     if arama:
         filtered_df = filtered_df[
@@ -233,13 +224,8 @@ with tab_liste:
         "TRN Başlangıç", "Geçen Süre (Gün)", "Kalan Gün", "Durum"
     ]]
 
-    st.dataframe(
-        display_df,
-        use_container_width=True,
-        hide_index=True
-    )
+    st.dataframe(display_df, use_container_width=True)
 
-    # Dışa aktarma
     csv = display_df.to_csv(index=False).encode('utf-8-sig')
     st.download_button(
         label="📥 Tabloyu Excel/CSV Olarak İndir",
@@ -248,7 +234,7 @@ with tab_liste:
         mime="text/csv"
     )
 
-# ----------------- SEKME 2: YENİ PERSONEL EKLEME -----------------
+# 2. SEKME: YENİ GİRİŞ
 with tab_yeni:
     st.subheader("Yeni Menti / TRN Kaydı")
     with st.form("yeni_personel_formu", clear_on_submit=True):
@@ -265,7 +251,7 @@ with tab_yeni:
             
         st.info("💡 Minimum 60 günlük operasyonel eğitim süresi başlangıç tarihinden itibaren sistem tarafından otomatik hesaplanacaktır.")
         
-        submitted = st.form_submit_button("Personeli Sisteme Kaydet", use_container_width=True)
+        submitted = st.form_submit_button("Personeli Sisteme Kaydet")
         if submitted:
             if not yeni_sicil or not yeni_ad or not yeni_mentor:
                 st.error("Lütfen yıldızlı (*) zorunlu alanları doldurun.")
@@ -283,9 +269,9 @@ with tab_yeni:
                 }
                 st.session_state.trn_data.append(yeni_kayit)
                 st.success(f"✅ {yeni_ad} ({yeni_sicil}) başarıyla kaydedildi!")
-                st.rerun()
+                trigger_rerun()
 
-# ----------------- SEKME 3: DEĞERLENDİRME & RELEASE -----------------
+# 3. SEKME: DEĞERLENDİRME & RELEASE
 with tab_degerlendirme:
     st.subheader("Mentor Değerlendirme & Release Onay Ekranı")
     
@@ -303,26 +289,24 @@ with tab_degerlendirme:
         c1, c2, c3 = st.columns(3)
         c1.metric("Kontuar TRN Başlangıç", personel["kontuar_baslangic"].strftime("%d.%m.%Y"))
         c2.metric("Tamamlanan Gün", f"{gecen} Gün")
-        c3.metric("Kalan Minimum Süre", f"{kalan} Gün")
+        c3.metric("Kalan Asgari Süre", f"{kalan} Gün")
         
-        # Süre Kuralı Uyarısı
         if gecen >= 60:
-            st.success("🟢 60 günlük yasal kontuar süresi doldurulmuştur. Release kararı verilebilir.")
+            st.success("🟢 60 günlük asgari kontuar süresi doldurulmuştur. Release kararı verilebilir.")
         else:
             st.warning(f"⏳ 60 günlük asgari süre dolmamıştır. Release verilebilmesi için personelin **{kalan} gün** daha eğitim alması gerekmektedir.")
         
         with st.form("degerlendirme_formu"):
             yeni_mentor_notu = st.text_area("Mentor Performans Değerlendirmesi", value=personel["mentor_notu"])
             yeni_release_notu = st.text_area("Lufthansa İstasyon / Release Açıklaması", value=personel["release_aciklama"])
-            yeni_durum = st.selectbox(
-                "Süreç Durumunu Güncelle", 
-                ["Kontuar TRN (Devam Ediyor)", "Değerlendirme Aşaması", "Release Verildi", "Aksiyon Gerekiyor"],
-                index=["Kontuar TRN (Devam Ediyor)", "Değerlendirme Aşaması", "Release Verildi", "Aksiyon Gerekiyor"].index(personel["durum"])
-            )
             
-            kaydet_btn = st.form_submit_button("Değerlendirmeyi Kaydet", use_container_width=True)
+            durum_listesi = ["Kontuar TRN (Devam Ediyor)", "Değerlendirme Aşaması", "Release Verildi", "Aksiyon Gerekiyor"]
+            mevcut_index = durum_listesi.index(personel["durum"]) if personel["durum"] in durum_listesi else 0
+            
+            yeni_durum = st.selectbox("Süreç Durumunu Güncelle", durum_listesi, index=mevcut_index)
+            
+            kaydet_btn = st.form_submit_button("Değerlendirmeyi Kaydet")
             if kaydet_btn:
-                # 60 gün kontrol kuralı
                 if yeni_durum == "Release Verildi" and gecen < 60:
                     st.error(f"❌ Kural İhlali: Personel 60 günü tamamlamadan ({gecen}/60) 'Release Verildi' durumuna alınamaz!")
                 else:
@@ -330,4 +314,4 @@ with tab_degerlendirme:
                     personel["release_aciklama"] = yeni_release_notu
                     personel["durum"] = yeni_durum
                     st.success("Değerlendirme ve süreç başarıyla güncellendi.")
-                    st.rerun()
+                    trigger_rerun()

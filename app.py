@@ -30,7 +30,7 @@ st.markdown(
     }
 
     html, body, [class*="css"] {
-        font-family:'Inter', sans-serif;
+        font-family:'Inter',sans-serif;
     }
 
     .stApp {
@@ -585,7 +585,7 @@ PROCESS_STATUSES = [
 
 
 def seed_users():
-    """Örnek mentor hesaplarını oluşturur."""
+    """Örnek mentor hesaplarını döndürür."""
     return {
         "selin.kaya": {
             "password": "mentor123",
@@ -603,7 +603,7 @@ def seed_users():
 
 
 def seed_trainees():
-    """Mentor atamalarını içeren örnek TRN personel havuzu."""
+    """Mentor atamalarını içeren TRN personel havuzu."""
     return [
         {
             "code": "TR1042",
@@ -765,7 +765,9 @@ def seed_evaluations():
         action,
         status,
     ) in samples:
-        operation_day = today - timedelta(days=days_ago)
+        operation_day = today - timedelta(
+            days=days_ago
+        )
 
         output.append(
             {
@@ -823,7 +825,7 @@ def logout():
 
 
 def reset_demo_data():
-    """Uygulamayı örnek veri setine döndürür."""
+    """Örnek kullanıcı ve değerlendirme verilerini yükler."""
     st.session_state.users = seed_users()
     st.session_state.trainees = seed_trainees()
     st.session_state.evaluations = seed_evaluations()
@@ -837,12 +839,12 @@ def make_record_id():
 
 
 def trainee_label(item):
-    """Personel seçim etiketini oluşturur."""
+    """TRN personel seçim etiketini oluşturur."""
     return f"{item['code']} - {item['name']}"
 
 
 def evaluations_dataframe(records):
-    """Kayıtları dışa aktarma için DataFrame'e dönüştürür."""
+    """Kayıtları rapor indirme için DataFrame'e dönüştürür."""
     columns = [
         "kayit_id",
         "zaman_damgasi",
@@ -864,7 +866,9 @@ def evaluations_dataframe(records):
     dataframe = pd.DataFrame(records)
 
     if dataframe.empty:
-        return pd.DataFrame(columns=columns)
+        return pd.DataFrame(
+            columns=columns
+        )
 
     for column in columns:
         if column not in dataframe.columns:
@@ -880,7 +884,7 @@ def evaluations_dataframe(records):
 
 
 def csv_bytes(records):
-    """Kayıtları Excel uyumlu UTF-8 CSV verisine dönüştürür."""
+    """Kayıtları Excel uyumlu UTF-8 CSV'ye dönüştürür."""
     return (
         evaluations_dataframe(records)
         .to_csv(
@@ -893,54 +897,48 @@ def csv_bytes(records):
 
 
 def render_header(subtitle):
-    """Kurumsal üst başlığı oluşturur."""
+    """Kurumsal üst paneli oluşturur."""
+    header_html = (
+        '<div class="hero">'
+        '<div class="hero-row">'
+        '<div class="brand-badge">✈</div>'
+        "<div>"
+        "<h1>İstasyon TRN Takip ve Değerlendirme Portalı</h1>"
+        f"<p>{safe_html(subtitle)}</p>"
+        "</div>"
+        "</div>"
+        "</div>"
+    )
+
     st.markdown(
-        f"""
-        <div class="hero">
-            <div class="hero-row">
-                <div class="brand-badge">✈</div>
-
-                <div>
-                    <h1>
-                        İstasyon TRN Takip ve Değerlendirme Portalı
-                    </h1>
-
-                    <p>{subtitle}</p>
-                </div>
-            </div>
-        </div>
-        """,
+        header_html,
         unsafe_allow_html=True,
     )
 
 
-def render_metric(label, value, note, color):
+def render_metric(
+    label,
+    value,
+    note,
+    color,
+):
     """Özel tasarımlı KPI kartı oluşturur."""
+    metric_html = (
+        f'<div class="metric-card" style="--accent:{color}">'
+        f'<div class="metric-label">{safe_html(label)}</div>'
+        f'<div class="metric-value">{safe_html(value)}</div>'
+        f'<div class="metric-note">{safe_html(note)}</div>'
+        "</div>"
+    )
+
     st.markdown(
-        f"""
-        <div
-            class="metric-card"
-            style="--accent:{color}"
-        >
-            <div class="metric-label">
-                {label}
-            </div>
-
-            <div class="metric-value">
-                {value}
-            </div>
-
-            <div class="metric-note">
-                {note}
-            </div>
-        </div>
-        """,
+        metric_html,
         unsafe_allow_html=True,
     )
 
 
 def safe_html(value):
-    """Kullanıcı metinlerini HTML içinde güvenli gösterir."""
+    """Kullanıcı metinlerini HTML kartlarında güvenli gösterir."""
     return (
         str(value)
         .replace("&", "&amp;")
@@ -956,7 +954,7 @@ def render_evaluation_card(
     record,
     show_mentor=True,
 ):
-    """Tek bir değerlendirmeyi modern kart olarak gösterir."""
+    """Tek bir TRN değerlendirmesini modern kart olarak gösterir."""
     competency = record["yetkinlik_seviyesi"]
 
     if competency == "Başarılı":
@@ -982,9 +980,11 @@ def render_evaluation_card(
 
     if show_mentor:
         mentor_block = (
-            '<div>'
-            '<div class="evaluation-label">Mentor</div>'
-            f'<div class="evaluation-value">'
+            "<div>"
+            '<div class="evaluation-label">'
+            "Mentor"
+            "</div>"
+            '<div class="evaluation-value">'
             f'{safe_html(record["mentor_ad_soyad"])}'
             "</div>"
             "</div>"
@@ -995,99 +995,108 @@ def render_evaluation_card(
         or "Ek aksiyon girilmedi."
     )
 
+    # HTML'nin girintiler nedeniyle Markdown kod bloğuna
+    # dönüşmemesi için kart tek ve girintisiz akışta oluşturulur.
+    card_html = (
+        f'<div class="evaluation-card" '
+        f'style="--card-accent:{accent}">'
+
+        '<div class="evaluation-head">'
+
+        "<div>"
+
+        '<div class="evaluation-name">'
+        f'{safe_html(record["trn_sicil"])}'
+        " · "
+        f'{safe_html(record["trn_ad_soyad"])}'
+        "</div>"
+
+        '<div class="evaluation-id">'
+        f'{safe_html(record["kayit_id"])}'
+        " · "
+        f'{safe_html(record["zaman_damgasi"])}'
+        "</div>"
+
+        "</div>"
+
+        '<div class="score-circle">'
+        f'{int(record["mentor_puani"])}/5'
+        "</div>"
+
+        "</div>"
+
+        '<div class="flight-band">'
+
+        "<span>"
+        "✈ "
+        f'{safe_html(record["ucus_bilgisi"])}'
+        "</span>"
+
+        f'<span class="pill {pill_class}">'
+        f"{safe_html(competency)}"
+        "</span>"
+
+        "</div>"
+
+        '<div class="evaluation-grid">'
+
+        "<div>"
+        '<div class="evaluation-label">'
+        "Operasyon Tarihi"
+        "</div>"
+        '<div class="evaluation-value">'
+        f"{operation_date}"
+        "</div>"
+        "</div>"
+
+        "<div>"
+        '<div class="evaluation-label">'
+        "Vardiya"
+        "</div>"
+        '<div class="evaluation-value">'
+        f'{safe_html(record["vardiya"])}'
+        "</div>"
+        "</div>"
+
+        "<div>"
+        '<div class="evaluation-label">'
+        "Görev / Eğitim"
+        "</div>"
+        '<div class="evaluation-value">'
+        f'{safe_html(record["gorev_alani"])}'
+        "</div>"
+        "</div>"
+
+        "<div>"
+        '<div class="evaluation-label">'
+        "Süreç Durumu"
+        "</div>"
+        '<div class="evaluation-value">'
+        f'{safe_html(record["surec_durumu"])}'
+        "</div>"
+        "</div>"
+
+        f"{mentor_block}"
+
+        "</div>"
+
+        '<div class="note-box">'
+        "<b>Mentor değerlendirmesi</b>"
+        "<br>"
+        f'{safe_html(record["degerlendirme_notu"])}'
+        "</div>"
+
+        '<div class="note-box">'
+        "<b>Aksiyon</b>"
+        "<br>"
+        f"{safe_html(action_text)}"
+        "</div>"
+
+        "</div>"
+    )
+
     st.markdown(
-        f"""
-        <div
-            class="evaluation-card"
-            style="--card-accent:{accent}"
-        >
-            <div class="evaluation-head">
-                <div>
-                    <div class="evaluation-name">
-                        {safe_html(record["trn_sicil"])}
-                        ·
-                        {safe_html(record["trn_ad_soyad"])}
-                    </div>
-
-                    <div class="evaluation-id">
-                        {safe_html(record["kayit_id"])}
-                        ·
-                        {safe_html(record["zaman_damgasi"])}
-                    </div>
-                </div>
-
-                <div class="score-circle">
-                    {int(record["mentor_puani"])}/5
-                </div>
-            </div>
-
-            <div class="flight-band">
-                <span>
-                    ✈ {safe_html(record["ucus_bilgisi"])}
-                </span>
-
-                <span class="pill {pill_class}">
-                    {safe_html(competency)}
-                </span>
-            </div>
-
-            <div class="evaluation-grid">
-                <div>
-                    <div class="evaluation-label">
-                        Operasyon Tarihi
-                    </div>
-
-                    <div class="evaluation-value">
-                        {operation_date}
-                    </div>
-                </div>
-
-                <div>
-                    <div class="evaluation-label">
-                        Vardiya
-                    </div>
-
-                    <div class="evaluation-value">
-                        {safe_html(record["vardiya"])}
-                    </div>
-                </div>
-
-                <div>
-                    <div class="evaluation-label">
-                        Görev / Eğitim
-                    </div>
-
-                    <div class="evaluation-value">
-                        {safe_html(record["gorev_alani"])}
-                    </div>
-                </div>
-
-                <div>
-                    <div class="evaluation-label">
-                        Süreç Durumu
-                    </div>
-
-                    <div class="evaluation-value">
-                        {safe_html(record["surec_durumu"])}
-                    </div>
-                </div>
-
-                {mentor_block}
-            </div>
-
-            <div class="note-box">
-                <b>Mentor değerlendirmesi</b>
-                <br>
-                {safe_html(record["degerlendirme_notu"])}
-            </div>
-
-            <div class="note-box">
-                <b>Aksiyon</b>
-                <br>
-                {safe_html(action_text)}
-            </div>
-        </div>
-        """,
+        card_html,
         unsafe_allow_html=True,
     )
 
@@ -1096,7 +1105,7 @@ def render_evaluation_cards(
     records,
     show_mentor=True,
 ):
-    """Değerlendirmeleri responsive kartlar halinde gösterir."""
+    """Değerlendirmeleri iki sütunlu kartlar halinde gösterir."""
     if not records:
         st.info(
             "Görüntülenecek değerlendirme bulunmuyor."
@@ -1109,10 +1118,16 @@ def render_evaluation_cards(
         reverse=True,
     )
 
-    for index in range(0, len(ordered), 2):
+    for index in range(
+        0,
+        len(ordered),
+        2,
+    ):
         columns = st.columns(2)
 
-        for offset, column in enumerate(columns):
+        for offset, column in enumerate(
+            columns
+        ):
             record_index = index + offset
 
             if record_index < len(ordered):
@@ -1135,51 +1150,33 @@ def authentication_page():
         "için güvenli operasyon portalı"
     )
 
-    st.markdown(
-        '<div class="login-wrap">',
-        unsafe_allow_html=True,
+    login_html = (
+        '<div class="login-shell">'
+        '<div class="login-intro">'
+        "<div>"
+        '<div class="eyebrow">'
+        "Güvenli Operasyon Erişimi"
+        "</div>"
+        '<div class="login-title">'
+        "TRN sürecinizi tek merkezden yönetin"
+        "</div>"
+        '<div class="login-copy">'
+        "Mentor değerlendirmeleri, uçuş bazlı performans "
+        "kayıtları ve istasyon raporları için rol bazlı erişim."
+        "</div>"
+        "</div>"
+        '<div class="login-shield">⌁</div>'
+        "</div>"
+        '<div class="feature-row">'
+        '<div class="feature-chip">✓ Rol Bazlı Yetki</div>'
+        '<div class="feature-chip">✈ Uçuş Bazlı Takip</div>'
+        '<div class="feature-chip">▣ Anlık Raporlama</div>'
+        "</div>"
+        "</div>"
     )
 
     st.markdown(
-        """
-        <div class="login-shell">
-            <div class="login-intro">
-                <div>
-                    <div class="eyebrow">
-                        Güvenli Operasyon Erişimi
-                    </div>
-
-                    <div class="login-title">
-                        TRN sürecinizi tek merkezden yönetin
-                    </div>
-
-                    <div class="login-copy">
-                        Mentor değerlendirmeleri, uçuş bazlı
-                        performans kayıtları ve istasyon raporları
-                        için rol bazlı erişim.
-                    </div>
-                </div>
-
-                <div class="login-shield">
-                    ⌁
-                </div>
-            </div>
-
-            <div class="feature-row">
-                <div class="feature-chip">
-                    ✓ Rol Bazlı Yetki
-                </div>
-
-                <div class="feature-chip">
-                    ✈ Uçuş Bazlı Takip
-                </div>
-
-                <div class="feature-chip">
-                    ▣ Anlık Raporlama
-                </div>
-            </div>
-        </div>
-        """,
+        login_html,
         unsafe_allow_html=True,
     )
 
@@ -1213,15 +1210,19 @@ def authentication_page():
                     type="password",
                 )
 
-                submitted = st.form_submit_button(
-                    "Mentor Girişi",
-                    type="primary",
-                    use_container_width=True,
+                submitted = (
+                    st.form_submit_button(
+                        "Mentor Girişi",
+                        type="primary",
+                        use_container_width=True,
+                    )
                 )
 
             if submitted:
                 key = username.strip().lower()
-                user = st.session_state.users.get(key)
+                user = st.session_state.users.get(
+                    key
+                )
 
                 if (
                     user
@@ -1247,15 +1248,13 @@ def authentication_page():
                     )
 
             st.markdown(
-                """
-                <div class="demo-box">
-                    <b>Demo mentor:</b>
-                    selin.kaya
-                    &nbsp;·&nbsp;
-                    <b>Şifre:</b>
-                    mentor123
-                </div>
-                """,
+                (
+                    '<div class="demo-box">'
+                    "<b>Demo mentor:</b> selin.kaya"
+                    "&nbsp;·&nbsp;"
+                    "<b>Şifre:</b> mentor123"
+                    "</div>"
+                ),
                 unsafe_allow_html=True,
             )
 
@@ -1266,10 +1265,12 @@ def authentication_page():
                     type="password",
                 )
 
-                submitted = st.form_submit_button(
-                    "Yetkili Konsoluna Gir",
-                    type="primary",
-                    use_container_width=True,
+                submitted = (
+                    st.form_submit_button(
+                        "Yetkili Konsoluna Gir",
+                        type="primary",
+                        use_container_width=True,
+                    )
                 )
 
             if submitted:
@@ -1294,12 +1295,12 @@ def authentication_page():
                     )
 
             st.markdown(
-                """
-                <div class="demo-box">
-                    <b>Demo yetkili parolası:</b>
-                    chef2026
-                </div>
-                """,
+                (
+                    '<div class="demo-box">'
+                    "<b>Demo yetkili parolası:</b> "
+                    "chef2026"
+                    "</div>"
+                ),
                 unsafe_allow_html=True,
             )
 
@@ -1392,11 +1393,6 @@ def authentication_page():
                     "Giriş sekmesinden oturum açabilirsiniz."
                 )
 
-    st.markdown(
-        "</div>",
-        unsafe_allow_html=True,
-    )
-
 
 # =============================================================================
 # MENTOR PANELİ
@@ -1414,22 +1410,18 @@ def mentor_panel():
     )
 
     with top1:
+        user_card = (
+            '<div class="info-card">'
+            '<div class="info-label">Aktif Kullanıcı</div>'
+            '<div class="info-value">'
+            f"{safe_html(full_name)}"
+            "</div>"
+            '<div class="subtle">Mentor yetkisi</div>'
+            "</div>"
+        )
+
         st.markdown(
-            f"""
-            <div class="info-card">
-                <div class="info-label">
-                    Aktif Kullanıcı
-                </div>
-
-                <div class="info-value">
-                    {safe_html(full_name)}
-                </div>
-
-                <div class="subtle">
-                    Mentor yetkisi
-                </div>
-            </div>
-            """,
+            user_card,
             unsafe_allow_html=True,
         )
 
@@ -1586,31 +1578,21 @@ def mentor_panel():
                         "zaman_damgasi": now_text,
                         "mentor_kullanici": username,
                         "mentor_ad_soyad": full_name,
-                        "trn_sicil": (
-                            selected_trainee["code"]
-                        ),
-                        "trn_ad_soyad": (
-                            selected_trainee["name"]
-                        ),
-                        "operasyon_tarihi": (
-                            operation_date
-                        ),
+                        "trn_sicil": selected_trainee[
+                            "code"
+                        ],
+                        "trn_ad_soyad": selected_trainee[
+                            "name"
+                        ],
+                        "operasyon_tarihi": operation_date,
                         "vardiya": shift,
                         "ucus_bilgisi": flight,
                         "gorev_alani": duty,
                         "mentor_puani": score,
-                        "yetkinlik_seviyesi": (
-                            competency
-                        ),
-                        "degerlendirme_notu": (
-                            note.strip()
-                        ),
-                        "aksiyon_maddeleri": (
-                            actions.strip()
-                        ),
-                        "surec_durumu": (
-                            process_status
-                        ),
+                        "yetkinlik_seviyesi": competency,
+                        "degerlendirme_notu": note.strip(),
+                        "aksiyon_maddeleri": actions.strip(),
+                        "surec_durumu": process_status,
                         "son_guncelleme": now_text,
                     }
                 )
@@ -1685,9 +1667,7 @@ def mentor_panel():
                 ): record
                 for record in sorted(
                     my_records,
-                    key=lambda item: (
-                        item["zaman_damgasi"]
-                    ),
+                    key=lambda item: item["zaman_damgasi"],
                     reverse=True,
                 )
             }
@@ -1714,9 +1694,7 @@ def mentor_panel():
                         "Yetkinlik Seviyesi",
                         COMPETENCIES,
                         index=COMPETENCIES.index(
-                            selected[
-                                "yetkinlik_seviyesi"
-                            ]
+                            selected["yetkinlik_seviyesi"]
                         ),
                     )
 
@@ -1731,17 +1709,13 @@ def mentor_panel():
 
                 edit_note = st.text_area(
                     "Değerlendirme Notu",
-                    value=selected[
-                        "degerlendirme_notu"
-                    ],
+                    value=selected["degerlendirme_notu"],
                     height=110,
                 )
 
                 edit_actions = st.text_area(
                     "Aksiyon Maddeleri",
-                    value=selected[
-                        "aksiyon_maddeleri"
-                    ],
+                    value=selected["aksiyon_maddeleri"],
                     height=90,
                 )
 
@@ -1759,26 +1733,17 @@ def mentor_panel():
                     )
 
                 else:
-                    selected["mentor_puani"] = (
-                        edit_score
-                    )
-
+                    selected["mentor_puani"] = edit_score
                     selected["yetkinlik_seviyesi"] = (
                         edit_competency
                     )
-
-                    selected["surec_durumu"] = (
-                        edit_status
-                    )
-
+                    selected["surec_durumu"] = edit_status
                     selected["degerlendirme_notu"] = (
                         edit_note.strip()
                     )
-
                     selected["aksiyon_maddeleri"] = (
                         edit_actions.strip()
                     )
-
                     selected["son_guncelleme"] = (
                         datetime.now().strftime(
                             "%Y-%m-%d %H:%M:%S"
@@ -1798,8 +1763,8 @@ def mentor_panel():
 # =============================================================================
 def admin_console():
     render_header(
-        "Yetkili / Şef Konsolu · Tüm istasyon "
-        "eğitim performansının merkezi görünümü"
+        "Yetkili / Şef Konsolu · Tüm istasyon eğitim "
+        "performansının merkezi görünümü"
     )
 
     records = st.session_state.evaluations
@@ -1822,8 +1787,7 @@ def admin_console():
     }
 
     critical_count = sum(
-        record["yetkinlik_seviyesi"]
-        == "Kritik Hata"
+        record["yetkinlik_seviyesi"] == "Kritik Hata"
         or int(record["mentor_puani"]) <= 1
         for record in records
     )
@@ -2034,12 +1998,12 @@ def admin_console():
         )
 
         if filtered:
-            filtered_df = evaluations_dataframe(
+            filtered_dataframe = evaluations_dataframe(
                 filtered
             )
 
             summary = (
-                filtered_df
+                filtered_dataframe
                 .groupby(
                     [
                         "trn_sicil",
@@ -2070,9 +2034,7 @@ def admin_console():
             )
 
             summary["ortalama_puan"] = (
-                summary[
-                    "ortalama_puan"
-                ].round(2)
+                summary["ortalama_puan"].round(2)
             )
 
             st.markdown(
@@ -2083,45 +2045,41 @@ def admin_console():
             )
 
             summary_columns = st.columns(
-                min(3, len(summary))
+                min(
+                    3,
+                    len(summary),
+                )
             )
 
             for position, (_, row) in enumerate(
                 summary.iterrows()
             ):
                 with summary_columns[
-                    position
-                    % len(summary_columns)
+                    position % len(summary_columns)
                 ]:
+                    summary_html = (
+                        '<div class="info-card">'
+                        '<div class="info-label">'
+                        f'{safe_html(row["trn_sicil"])}'
+                        "</div>"
+                        '<div class="info-value">'
+                        f'{safe_html(row["trn_ad_soyad"])}'
+                        "</div>"
+                        '<div class="subtle">'
+                        f'{int(row["degerlendirme_sayisi"])} '
+                        "uçuş kaydı · Ortalama "
+                        f'{row["ortalama_puan"]}/5'
+                        "</div>"
+                        "</div>"
+                    )
+
                     st.markdown(
-                        f"""
-                        <div class="info-card">
-                            <div class="info-label">
-                                {safe_html(row["trn_sicil"])}
-                            </div>
-
-                            <div class="info-value">
-                                {safe_html(row["trn_ad_soyad"])}
-                            </div>
-
-                            <div class="subtle">
-                                {
-                                    int(
-                                        row[
-                                            "degerlendirme_sayisi"
-                                        ]
-                                    )
-                                }
-                                uçuş kaydı · Ortalama
-                                {row["ortalama_puan"]}/5
-                            </div>
-                        </div>
-                        """,
+                        summary_html,
                         unsafe_allow_html=True,
                     )
 
             score_summary = (
-                filtered_df
+                filtered_dataframe
                 .groupby(
                     "mentor_ad_soyad",
                     as_index=False,
@@ -2152,46 +2110,36 @@ def admin_console():
             )
 
             mentor_columns = st.columns(
-                min(3, len(score_summary))
+                min(
+                    3,
+                    len(score_summary),
+                )
             )
 
             for position, (_, row) in enumerate(
                 score_summary.iterrows()
             ):
                 with mentor_columns[
-                    position
-                    % len(mentor_columns)
+                    position % len(mentor_columns)
                 ]:
+                    mentor_html = (
+                        '<div class="info-card">'
+                        '<div class="info-label">'
+                        "Mentor"
+                        "</div>"
+                        '<div class="info-value">'
+                        f'{safe_html(row["mentor_ad_soyad"])}'
+                        "</div>"
+                        '<div class="subtle">'
+                        f'{int(row["kayit_sayisi"])} '
+                        "değerlendirme · Ortalama "
+                        f'{row["ortalama_puan"]}/5'
+                        "</div>"
+                        "</div>"
+                    )
+
                     st.markdown(
-                        f"""
-                        <div class="info-card">
-                            <div class="info-label">
-                                Mentor
-                            </div>
-
-                            <div class="info-value">
-                                {
-                                    safe_html(
-                                        row[
-                                            "mentor_ad_soyad"
-                                        ]
-                                    )
-                                }
-                            </div>
-
-                            <div class="subtle">
-                                {
-                                    int(
-                                        row[
-                                            "kayit_sayisi"
-                                        ]
-                                    )
-                                }
-                                değerlendirme · Ortalama
-                                {row["ortalama_puan"]}/5
-                            </div>
-                        </div>
-                        """,
+                        mentor_html,
                         unsafe_allow_html=True,
                     )
 
@@ -2245,13 +2193,13 @@ def admin_console():
         )
 
         st.markdown(
-            """
-            <div class="hint">
-                Dışa aktarılan UTF-8 CSV dosyası Excel ile
-                doğrudan açılabilir. Sıfırlama işlemi mevcut
-                oturumdaki kayıtları örnek veri setine döndürür.
-            </div>
-            """,
+            (
+                '<div class="hint">'
+                "Dışa aktarılan UTF-8 CSV dosyası Excel ile "
+                "doğrudan açılabilir. Sıfırlama işlemi mevcut "
+                "oturumdaki kayıtları örnek veri setine döndürür."
+                "</div>"
+            ),
             unsafe_allow_html=True,
         )
 

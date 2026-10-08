@@ -3,11 +3,11 @@ import pandas as pd
 from datetime import date, datetime, timedelta
 
 
-# -----------------------------------------------------------------------------
-# Sayfa ayarları ve kurumsal görünüm
-# -----------------------------------------------------------------------------
+# =============================================================================
+# SAYFA AYARLARI VE KURUMSAL TASARIM
+# =============================================================================
 st.set_page_config(
-    page_title="Lufthansa TRN Takip Portalı",
+    page_title="İstasyon TRN Takip Portalı",
     page_icon="✈️",
     layout="wide",
     initial_sidebar_state="collapsed",
@@ -18,70 +18,278 @@ st.markdown(
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
-    :root { --navy:#05164D; --yellow:#FFAC00; --bg:#F4F6F9; --green:#16845B; }
-    html, body, [class*="css"] { font-family:'Inter', sans-serif; }
-    .stApp { background:var(--bg); color:#14213d; }
-    .block-container { max-width:1450px; padding-top:1.4rem; padding-bottom:3rem; }
-    #MainMenu, footer { visibility:hidden; }
+    :root {
+        --navy:#05164D;
+        --yellow:#FFAC00;
+        --bg:#F4F6F9;
+        --white:#FFFFFF;
+        --green:#16845B;
+        --red:#C93F49;
+        --text:#18243D;
+        --muted:#738096;
+    }
+
+    html, body, [class*="css"] {
+        font-family:'Inter', sans-serif;
+    }
+
+    .stApp {
+        background:var(--bg);
+        color:var(--text);
+    }
+
+    .block-container {
+        max-width:1450px;
+        padding-top:1.35rem;
+        padding-bottom:3rem;
+    }
+
+    #MainMenu, footer {
+        visibility:hidden;
+    }
 
     .hero {
-        background:linear-gradient(125deg,#05164D 0%,#0A2B70 72%,#153A83 100%);
-        border-radius:18px; padding:25px 28px; color:white; margin-bottom:20px;
-        box-shadow:0 12px 30px rgba(5,22,77,.18); position:relative; overflow:hidden;
+        background:linear-gradient(
+            125deg,
+            #05164D 0%,
+            #0A2B70 72%,
+            #153A83 100%
+        );
+        border-radius:18px;
+        padding:24px 28px;
+        color:white;
+        margin-bottom:18px;
+        box-shadow:0 12px 30px rgba(5,22,77,.18);
+        position:relative;
+        overflow:hidden;
     }
-    .hero:after { content:""; position:absolute; width:180px; height:180px;
-        border:30px solid rgba(255,172,0,.14); border-radius:50%; right:-55px; top:-75px; }
-    .hero-row { display:flex; gap:18px; align-items:center; position:relative; z-index:2; }
-    .brand-badge { width:58px; height:58px; min-width:58px; border-radius:50%;
-        display:flex; align-items:center; justify-content:center; background:#FFAC00;
-        color:#05164D; font-size:28px; box-shadow:0 5px 16px rgba(0,0,0,.18); }
-    .hero h1 { margin:0; font-size:clamp(1.35rem,3vw,2.15rem); letter-spacing:-.03em; }
-    .hero p { margin:6px 0 0; opacity:.82; font-size:.94rem; }
 
-    .metric-card { background:white; border-radius:14px; padding:18px 19px; min-height:125px;
-        box-shadow:0 5px 18px rgba(15,33,65,.07); border-top:4px solid var(--accent); }
-    .metric-label { color:#697386; font-size:.78rem; font-weight:700; text-transform:uppercase;
-        letter-spacing:.055em; min-height:36px; }
-    .metric-value { color:#05164D; font-size:2rem; font-weight:800; margin-top:8px; }
-    .metric-note { color:#8b95a7; font-size:.73rem; margin-top:1px; }
-
-    .section-title { color:#05164D; font-size:1.12rem; font-weight:800; margin:18px 0 10px; }
-    .person-card { background:white; border:1px solid #e6eaf0; border-radius:14px;
-        padding:17px 19px; margin:9px 0; box-shadow:0 3px 12px rgba(20,33,61,.05); }
-    .person-head { display:flex; justify-content:space-between; gap:12px; align-items:flex-start; }
-    .person-name { color:#05164D; font-size:1.04rem; font-weight:800; }
-    .person-id { color:#7d8797; font-size:.78rem; margin-top:2px; }
-    .status { display:inline-block; border-radius:999px; padding:5px 10px; font-size:.72rem;
-        font-weight:700; white-space:nowrap; background:#eef1f6; color:#39445a; }
-    .status.ok { background:#e3f5ed; color:#087348; }
-    .status.warn { background:#fff0d1; color:#9b5c00; }
-    .status.done { background:#e7edff; color:#173b94; }
-    .detail-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:11px;
-        margin-top:15px; padding-top:14px; border-top:1px solid #edf0f4; }
-    .detail-label { color:#8992a2; font-size:.69rem; font-weight:700; text-transform:uppercase; }
-    .detail-value { color:#24304a; font-size:.83rem; font-weight:600; margin-top:3px; }
-    div[data-testid="stForm"], div[data-testid="stFileUploader"] {
-        background:white; border:1px solid #e5e9ef; border-radius:14px; padding:16px;
+    .hero:after {
+        content:"";
+        position:absolute;
+        width:180px;
+        height:180px;
+        border:30px solid rgba(255,172,0,.14);
+        border-radius:50%;
+        right:-55px;
+        top:-76px;
     }
-    div[data-baseweb="tab-list"] { gap:8px; }
-    button[data-baseweb="tab"] { background:white; border-radius:10px; padding:10px 16px; }
-    .stButton > button, .stDownloadButton > button { border-radius:10px; font-weight:700; min-height:43px; }
-    .stButton > button[kind="primary"] { background:#05164D; border-color:#05164D; }
-    [data-testid="stDataFrame"] { background:white; border-radius:12px; overflow:hidden; }
-    .hint { background:#eef3ff; border-left:4px solid #315aab; border-radius:8px;
-        padding:10px 13px; color:#2a3d65; font-size:.83rem; }
 
-    @media (max-width: 768px) {
-        .block-container { padding:12px 12px 35px; }
-        .hero { padding:20px 17px; border-radius:14px; }
-        .brand-badge { width:48px; height:48px; min-width:48px; font-size:23px; }
-        .hero p { font-size:.8rem; }
-        .metric-card { min-height:104px; padding:14px; margin-bottom:4px; }
-        .metric-value { font-size:1.65rem; }
-        .detail-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
-        .person-head { flex-direction:column; }
-        .stButton > button, .stDownloadButton > button { width:100%; }
-        div[data-testid="stHorizontalBlock"] { gap:.55rem; }
+    .hero-row {
+        display:flex;
+        gap:17px;
+        align-items:center;
+        position:relative;
+        z-index:2;
+    }
+
+    .brand-badge {
+        width:58px;
+        height:58px;
+        min-width:58px;
+        border-radius:50%;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        background:var(--yellow);
+        color:var(--navy);
+        font-size:28px;
+        box-shadow:0 5px 16px rgba(0,0,0,.18);
+    }
+
+    .hero h1 {
+        margin:0;
+        font-size:clamp(1.35rem,3vw,2.15rem);
+        letter-spacing:-.03em;
+    }
+
+    .hero p {
+        margin:6px 0 0;
+        opacity:.82;
+        font-size:.92rem;
+    }
+
+    .login-wrap {
+        max-width:760px;
+        margin:16px auto 0;
+    }
+
+    div[data-testid="stForm"] {
+        background:white;
+        border:1px solid #E4E9F0;
+        border-radius:14px;
+        padding:18px;
+        box-shadow:0 5px 18px rgba(15,33,65,.06);
+    }
+
+    .eyebrow {
+        color:#8C6500;
+        font-size:.72rem;
+        font-weight:800;
+        letter-spacing:.08em;
+        text-transform:uppercase;
+        margin-bottom:5px;
+    }
+
+    .section-title {
+        color:var(--navy);
+        font-size:1.12rem;
+        font-weight:800;
+        margin:18px 0 10px;
+    }
+
+    .subtle {
+        color:var(--muted);
+        font-size:.8rem;
+    }
+
+    .metric-card {
+        background:white;
+        border-radius:14px;
+        padding:17px 18px;
+        min-height:120px;
+        box-shadow:0 5px 18px rgba(15,33,65,.07);
+        border-top:4px solid var(--accent);
+    }
+
+    .metric-label {
+        color:#697386;
+        font-size:.75rem;
+        font-weight:700;
+        text-transform:uppercase;
+        letter-spacing:.05em;
+        min-height:35px;
+    }
+
+    .metric-value {
+        color:var(--navy);
+        font-size:1.9rem;
+        font-weight:800;
+        margin-top:7px;
+    }
+
+    .metric-note {
+        color:#8B95A7;
+        font-size:.72rem;
+    }
+
+    .info-card {
+        background:white;
+        border:1px solid #E5EAF0;
+        border-radius:13px;
+        padding:15px 17px;
+        box-shadow:0 3px 12px rgba(20,33,61,.05);
+        height:100%;
+    }
+
+    .info-label {
+        color:#8893A4;
+        font-size:.69rem;
+        text-transform:uppercase;
+        font-weight:800;
+    }
+
+    .info-value {
+        color:var(--navy);
+        font-size:1rem;
+        font-weight:750;
+        margin-top:3px;
+    }
+
+    .demo-box {
+        background:#FFF8E5;
+        border:1px solid #F0D58C;
+        border-radius:10px;
+        padding:11px 13px;
+        color:#68501B;
+        font-size:.78rem;
+    }
+
+    .hint {
+        background:#EDF3FF;
+        border-left:4px solid #315AAB;
+        border-radius:8px;
+        padding:10px 13px;
+        color:#2A3D65;
+        font-size:.82rem;
+    }
+
+    .audit-note {
+        background:#FFFFFF;
+        border:1px solid #E5E9EF;
+        border-radius:11px;
+        padding:12px 14px;
+        margin:7px 0;
+    }
+
+    .stButton > button,
+    .stDownloadButton > button {
+        border-radius:10px;
+        font-weight:700;
+        min-height:43px;
+        width:100%;
+    }
+
+    .stButton > button[kind="primary"] {
+        background:var(--navy);
+        border-color:var(--navy);
+    }
+
+    div[data-baseweb="tab-list"] {
+        gap:7px;
+    }
+
+    button[data-baseweb="tab"] {
+        background:white;
+        border-radius:10px;
+        padding:9px 15px;
+    }
+
+    [data-testid="stDataFrame"] {
+        background:white;
+        border-radius:12px;
+        overflow:auto;
+    }
+
+    @media (max-width:768px) {
+        .block-container {
+            padding:11px 11px 34px;
+        }
+
+        .hero {
+            padding:19px 16px;
+            border-radius:14px;
+        }
+
+        .brand-badge {
+            width:47px;
+            height:47px;
+            min-width:47px;
+            font-size:22px;
+        }
+
+        .hero p {
+            font-size:.78rem;
+        }
+
+        .metric-card {
+            min-height:103px;
+            padding:13px;
+            margin-bottom:4px;
+        }
+
+        .metric-value {
+            font-size:1.55rem;
+        }
+
+        div[data-testid="stHorizontalBlock"] {
+            gap:.55rem;
+        }
+
+        .stButton > button,
+        .stDownloadButton > button {
+            width:100%;
+        }
     }
     </style>
     """,
@@ -89,369 +297,1509 @@ st.markdown(
 )
 
 
-# -----------------------------------------------------------------------------
-# Veri motoru ve yardımcı fonksiyonlar
-# -----------------------------------------------------------------------------
-STATUSES = [
-    "Sınıf Eğitimi",
-    "Kontuar TRN (Devam Ediyor)",
+# =============================================================================
+# SABİTLER VE ÖRNEK VERİ ÜRETİCİLERİ
+# =============================================================================
+ADMIN_PASSWORD = "chef2026"
+
+FLIGHTS = [
+    "FL1299 - A320 / MUC",
+    "FL1301 - A321 / FRA",
+    "FL1305 - A320 / FRA",
+    "FL1313 - A321 / MUC",
+    "FL1407 - A320 / STR",
+    "FL1411 - A321 / DUS",
+]
+
+DUTIES = [
+    "Check-in İşlemleri",
+    "Boarding Operasyonu",
+    "Doküman Kontrolü",
+    "Bagaj / Gate Sorun Çözümü",
+    "Transfer Yolcu İşlemleri",
+    "Özel Hizmet Gerektiren Yolcu",
+]
+
+SHIFTS = [
+    "03:40–11:40",
+    "09:00–17:00",
+    "14:30–22:30",
+    "Diğer",
+]
+
+COMPETENCIES = [
+    "Başarılı",
+    "Geliştirilmeli",
+    "Kritik Hata",
+]
+
+PROCESS_STATUSES = [
+    "Eğitimde",
+    "İzlemede",
     "Değerlendirme Aşaması",
+    "Release Uygun",
     "Release Verildi",
-    "Aksiyon Gerekiyor",
 ]
 
 
-def calculate_dates(start_value):
-    """Başlangıçtan itibaren hedef tarihi ve bugüne göre kalan günü hesaplar."""
-    if isinstance(start_value, datetime):
-        start_value = start_value.date()
-    elif isinstance(start_value, str):
-        start_value = pd.to_datetime(start_value).date()
-    target = start_value + timedelta(days=60)
-    return target, (target - date.today()).days
+def seed_users():
+    """Prototip için örnek mentor hesaplarını döndürür."""
+    return {
+        "selin.kaya": {
+            "password": "mentor123",
+            "full_name": "Selin Kaya",
+        },
+        "murat.aksoy": {
+            "password": "mentor123",
+            "full_name": "Murat Aksoy",
+        },
+        "burak.sahin": {
+            "password": "mentor123",
+            "full_name": "Burak Şahin",
+        },
+    }
 
 
-def sample_records():
-    """Sunumda ilk açılışı dolu gösterecek, farklı aşamalardaki örnek kayıtlar."""
-    today = date.today()
-    seeds = [
-        ("TR1042", "Ahmet Yılmaz", "Selin Kaya", 18, True, "Kontuar TRN (Devam Ediyor)", "İletişimi güçlü, DCS ekranlarına hızlı adapte oluyor.", ""),
-        ("TR1087", "Elif Demir", "Murat Aksoy", 63, True, "Değerlendirme Aşaması", "Bagaj ve doküman kontrolünde bağımsız çalışabiliyor.", "Final gözlem vardiyası planlanacak."),
-        ("TR1115", "Can Eren", "Selin Kaya", 41, False, "Aksiyon Gerekiyor", "Mentorla yalnızca iki ortak vardiya gerçekleşti.", "Vardiya eşleşmesi revize edilmeli."),
-        ("TR1168", "Zeynep Arslan", "Burak Şahin", 76, True, "Release Verildi", "Tüm işlem adımlarında yeterli performans gösterdi.", "Release onayı tamamlandı."),
-        ("TR1203", "Mert Çelik", "Murat Aksoy", 7, True, "Sınıf Eğitimi", "Sınıf eğitimine katılımı düzenli.", ""),
-        ("TR1249", "Derya Koç", "Burak Şahin", 58, True, "Kontuar TRN (Devam Ediyor)", "Yoğun uçuşlarda hız ve doğruluk gelişiyor.", "60. gün değerlendirmesi bekleniyor."),
+def seed_trainees():
+    """Mentor atamalarını içeren örnek TRN personel havuzu."""
+    return [
+        {
+            "code": "TR1042",
+            "name": "Ahmet Yılmaz",
+            "mentor": "selin.kaya",
+            "status": "Eğitimde",
+        },
+        {
+            "code": "TR1087",
+            "name": "Elif Demir",
+            "mentor": "murat.aksoy",
+            "status": "Değerlendirme Aşaması",
+        },
+        {
+            "code": "TR1115",
+            "name": "Can Eren",
+            "mentor": "selin.kaya",
+            "status": "İzlemede",
+        },
+        {
+            "code": "TR1168",
+            "name": "Zeynep Arslan",
+            "mentor": "burak.sahin",
+            "status": "Release Uygun",
+        },
+        {
+            "code": "TR1203",
+            "name": "Mert Çelik",
+            "mentor": "murat.aksoy",
+            "status": "Eğitimde",
+        },
+        {
+            "code": "TR1249",
+            "name": "Derya Koç",
+            "mentor": "burak.sahin",
+            "status": "İzlemede",
+        },
     ]
-    records = []
-    for sicil, name, mentor, elapsed, compatible, status, note, comment in seeds:
-        start = today - timedelta(days=elapsed)
-        class_start = start - timedelta(days=5)
-        target, remaining = calculate_dates(start)
-        records.append({
-            "sicil_no": sicil,
-            "ad_soyad": name,
-            "sinif_egitimi_tarihleri": f"{class_start:%d.%m.%Y} - {(class_start + timedelta(days=2)):%d.%m.%Y}",
-            "mentor_ad_soyad": mentor,
-            "vardiya_uyumu": compatible,
-            "kontuar_trn_baslangic": start,
-            "hedef_release_tarihi": target,
-            "kalan_gun": remaining,
-            "mentor_notu": note,
-            "lufthansa_release_aciklama": comment,
-            "durum": status,
-        })
-    return records
 
 
-def refresh_calculated_fields():
-    for record in st.session_state.personnel:
-        target, remaining = calculate_dates(record["kontuar_trn_baslangic"])
-        record["hedef_release_tarihi"] = target
-        record["kalan_gun"] = remaining
+def seed_evaluations():
+    """IST çıkışlı maskeli uçuşlarla örnek değerlendirmeler."""
+    today = date.today()
+
+    samples = [
+        (
+            "EV-0001",
+            8,
+            "selin.kaya",
+            "Selin Kaya",
+            "TR1042",
+            "Ahmet Yılmaz",
+            "09:00–17:00",
+            FLIGHTS[1],
+            DUTIES[0],
+            4,
+            "Başarılı",
+            "DCS adımlarını doğru uyguladı; işlem hızı gelişiyor.",
+            "Yoğun uçuşta süre takibi yapılacak.",
+            "Eğitimde",
+        ),
+        (
+            "EV-0002",
+            7,
+            "murat.aksoy",
+            "Murat Aksoy",
+            "TR1087",
+            "Elif Demir",
+            "03:40–11:40",
+            FLIGHTS[0],
+            DUTIES[2],
+            5,
+            "Başarılı",
+            "Seyahat dokümanlarını eksiksiz kontrol etti.",
+            "Final gözlem planlanabilir.",
+            "Release Uygun",
+        ),
+        (
+            "EV-0003",
+            5,
+            "selin.kaya",
+            "Selin Kaya",
+            "TR1115",
+            "Can Eren",
+            "14:30–22:30",
+            FLIGHTS[3],
+            DUTIES[1],
+            2,
+            "Geliştirilmeli",
+            "Boarding anons sıralamasında desteğe ihtiyaç duydu.",
+            "Bir sonraki uçuşta anons akışı tekrar edilmeli.",
+            "İzlemede",
+        ),
+        (
+            "EV-0004",
+            4,
+            "burak.sahin",
+            "Burak Şahin",
+            "TR1168",
+            "Zeynep Arslan",
+            "09:00–17:00",
+            FLIGHTS[4],
+            DUTIES[3],
+            5,
+            "Başarılı",
+            "Irregularity senaryosunu bağımsız yönetti.",
+            "Release değerlendirmesi olumlu.",
+            "Release Uygun",
+        ),
+        (
+            "EV-0005",
+            2,
+            "murat.aksoy",
+            "Murat Aksoy",
+            "TR1203",
+            "Mert Çelik",
+            "09:00–17:00",
+            FLIGHTS[2],
+            DUTIES[2],
+            1,
+            "Kritik Hata",
+            "Vize kontrol adımında doğrulama desteği gerekti.",
+            "Doküman eğitimi yenilenmeli ve çift kontrol uygulanmalı.",
+            "Eğitimde",
+        ),
+        (
+            "EV-0006",
+            1,
+            "burak.sahin",
+            "Burak Şahin",
+            "TR1249",
+            "Derya Koç",
+            "14:30–22:30",
+            FLIGHTS[5],
+            DUTIES[1],
+            4,
+            "Başarılı",
+            "Boarding kapanış ve mutabakat adımlarını doğru tamamladı.",
+            "Bir ek yoğun uçuş gözlemi önerilir.",
+            "İzlemede",
+        ),
+    ]
+
+    output = []
+
+    for (
+        record_id,
+        days_ago,
+        username,
+        mentor,
+        code,
+        trainee,
+        shift,
+        flight,
+        duty,
+        score,
+        competency,
+        note,
+        action,
+        status,
+    ) in samples:
+        operation_day = today - timedelta(days=days_ago)
+
+        output.append(
+            {
+                "kayit_id": record_id,
+                "zaman_damgasi": f"{operation_day:%Y-%m-%d} 12:00:00",
+                "mentor_kullanici": username,
+                "mentor_ad_soyad": mentor,
+                "trn_sicil": code,
+                "trn_ad_soyad": trainee,
+                "operasyon_tarihi": operation_day,
+                "vardiya": shift,
+                "ucus_bilgisi": flight,
+                "gorev_alani": duty,
+                "mentor_puani": score,
+                "yetkinlik_seviyesi": competency,
+                "degerlendirme_notu": note,
+                "aksiyon_maddeleri": action,
+                "surec_durumu": status,
+                "son_guncelleme": (
+                    f"{operation_day:%Y-%m-%d} 12:00:00"
+                ),
+            }
+        )
+
+    return output
 
 
-def dataframe_for_export(records):
-    export_df = pd.DataFrame(records).copy()
-    if export_df.empty:
-        return export_df
-    export_df["vardiya_uyumu"] = export_df["vardiya_uyumu"].map({True: "Uyumlu", False: "Aksiyon Gerekiyor"})
-    for col in ["kontuar_trn_baslangic", "hedef_release_tarihi"]:
-        export_df[col] = export_df[col].apply(lambda x: x.strftime("%d.%m.%Y") if hasattr(x, "strftime") else x)
-    return export_df
+# =============================================================================
+# SESSION STATE VE ORTAK YARDIMCI FONKSİYONLAR
+# =============================================================================
+def initialize_state():
+    defaults = {
+        "users": seed_users(),
+        "trainees": seed_trainees(),
+        "evaluations": seed_evaluations(),
+        "authenticated": False,
+        "role": None,
+        "username": None,
+        "full_name": None,
+    }
+
+    for key, value in defaults.items():
+        if key not in st.session_state:
+            st.session_state[key] = value
 
 
-if "personnel" not in st.session_state:
-    st.session_state.personnel = sample_records()
-refresh_calculated_fields()
+def logout():
+    """Aktif kullanıcının oturumunu kapatır."""
+    st.session_state.authenticated = False
+    st.session_state.role = None
+    st.session_state.username = None
+    st.session_state.full_name = None
 
 
-# -----------------------------------------------------------------------------
-# Üst panel ve KPI kartları
-# -----------------------------------------------------------------------------
-st.markdown(
-    """
-    <div class="hero"><div class="hero-row">
-      <div class="brand-badge">✈</div>
-      <div><h1>Lufthansa TRN Takip ve Yönetim Portalı</h1>
-      <p>Yer hizmetleri personelinin sınıf eğitimi, mentorluk, kontuar TRN ve release süreçlerini tek noktadan yönetin.</p></div>
-    </div></div>
-    """,
-    unsafe_allow_html=True,
-)
+def reset_demo_data():
+    """Kullanıcı, personel ve değerlendirme verilerini yeniler."""
+    st.session_state.users = seed_users()
+    st.session_state.trainees = seed_trainees()
+    st.session_state.evaluations = seed_evaluations()
 
-records = st.session_state.personnel
-total = len(records)
-active = sum(r["durum"] == "Kontuar TRN (Devam Ediyor)" for r in records)
-due = sum(r["kalan_gun"] <= 0 and r["durum"] != "Release Verildi" for r in records)
-action = sum((not r["vardiya_uyumu"]) or r["durum"] == "Aksiyon Gerekiyor" for r in records)
 
-metric_data = [
-    ("Toplam Menti", total, "Kayıtlı personel", "#315AAB"),
-    ("Aktif Kontuar TRN", active, "Eğitimi devam eden", "#FFAC00"),
-    ("Süresi Dolan / Değerlendirmede", due, "60 gününü tamamlayan", "#16845B"),
-    ("Aksiyon Gereken", action, "Vardiya veya süreç", "#D64545"),
-]
-metric_cols = st.columns(4)
-for col, (label, value, note, color) in zip(metric_cols, metric_data):
-    col.markdown(
-        f'<div class="metric-card" style="--accent:{color}"><div class="metric-label">{label}</div>'
-        f'<div class="metric-value">{value}</div><div class="metric-note">{note}</div></div>',
-        unsafe_allow_html=True,
+def make_record_id():
+    """Her değerlendirme için benzersiz kayıt numarası üretir."""
+    return "EV-" + datetime.now().strftime("%Y%m%d%H%M%S%f")
+
+
+def trainee_label(item):
+    """TRN personelini sicil ve ad soyad ile görüntüler."""
+    return f"{item['code']} - {item['name']}"
+
+
+def evaluations_dataframe(records):
+    """Değerlendirme listesini düzenli DataFrame'e dönüştürür."""
+    columns = [
+        "kayit_id",
+        "zaman_damgasi",
+        "mentor_ad_soyad",
+        "trn_sicil",
+        "trn_ad_soyad",
+        "operasyon_tarihi",
+        "vardiya",
+        "ucus_bilgisi",
+        "gorev_alani",
+        "mentor_puani",
+        "yetkinlik_seviyesi",
+        "degerlendirme_notu",
+        "aksiyon_maddeleri",
+        "surec_durumu",
+        "son_guncelleme",
+    ]
+
+    df = pd.DataFrame(records)
+
+    if df.empty:
+        return pd.DataFrame(columns=columns)
+
+    for column in columns:
+        if column not in df.columns:
+            df[column] = ""
+
+    return df[columns].sort_values(
+        ["operasyon_tarihi", "zaman_damgasi"],
+        ascending=False,
     )
 
 
-# -----------------------------------------------------------------------------
-# Filtreler ve yönetim araçları
-# -----------------------------------------------------------------------------
-st.markdown('<div class="section-title">Personel ve Süreç Kontrolü</div>', unsafe_allow_html=True)
-f1, f2, f3 = st.columns([1.5, 1.25, 1])
-with f1:
-    search_text = st.text_input("Arama", placeholder="Sicil no, personel veya mentor...", label_visibility="collapsed")
-with f2:
-    selected_statuses = st.multiselect("Durum", STATUSES, placeholder="Tüm durumlar", label_visibility="collapsed")
-with f3:
-    only_actions = st.toggle("Yalnızca aksiyon gerekenler")
-
-q = search_text.casefold().strip()
-filtered = []
-for r in records:
-    searchable = f'{r["sicil_no"]} {r["ad_soyad"]} {r["mentor_ad_soyad"]}'.casefold()
-    if q and q not in searchable:
-        continue
-    if selected_statuses and r["durum"] not in selected_statuses:
-        continue
-    if only_actions and r["vardiya_uyumu"] and r["durum"] != "Aksiyon Gerekiyor":
-        continue
-    filtered.append(r)
-
-toolbar1, toolbar2, toolbar3 = st.columns([1.3, 1, 1])
-with toolbar1:
-    st.caption(f"{len(filtered)} kayıt gösteriliyor · Son kontrol: {datetime.now():%d.%m.%Y %H:%M}")
-with toolbar2:
-    csv_bytes = dataframe_for_export(records).to_csv(index=False, sep=";", encoding="utf-8-sig").encode("utf-8-sig")
-    st.download_button(
-        "⬇ CSV / Excel Uyumlu İndir",
-        data=csv_bytes,
-        file_name=f"lufthansa_trn_{date.today():%Y%m%d}.csv",
-        mime="text/csv",
-        use_container_width=True,
+def csv_bytes(records):
+    """Kayıtları Excel'in açabileceği UTF-8 CSV verisine çevirir."""
+    return (
+        evaluations_dataframe(records)
+        .to_csv(
+            index=False,
+            sep=";",
+            encoding="utf-8-sig",
+        )
+        .encode("utf-8-sig")
     )
-with toolbar3:
-    if st.button("↻ Verileri Sıfırla / Örnek Yükle", use_container_width=True):
-        st.session_state.personnel = sample_records()
-        st.toast("Örnek veriler yeniden yüklendi.", icon="✅")
-        st.rerun()
 
 
-# -----------------------------------------------------------------------------
-# Modern personel kartları
-# -----------------------------------------------------------------------------
-if not filtered:
-    st.info("Seçili filtrelere uyan personel bulunamadı.")
-
-for r in filtered:
-    elapsed = max(0, 60 - r["kalan_gun"])
-    eligible = r["kalan_gun"] <= 0
-    if r["durum"] == "Release Verildi":
-        badge_text, badge_class = "✓ Release Verildi", "done"
-    elif eligible:
-        badge_text, badge_class = "✓ Release İçin Uygun", "ok"
-    elif not r["vardiya_uyumu"] or r["durum"] == "Aksiyon Gerekiyor":
-        badge_text, badge_class = "! Aksiyon Gerekiyor", "warn"
-    else:
-        badge_text, badge_class = f"{r['kalan_gun']} Gün Kaldı", ""
-
+def render_header(subtitle):
+    """Kurumsal üst başlığı oluşturur."""
     st.markdown(
         f"""
-        <div class="person-card">
-          <div class="person-head"><div><div class="person-name">{r['ad_soyad']}</div>
-          <div class="person-id">{r['sicil_no']} · {r['durum']}</div></div>
-          <span class="status {badge_class}">{badge_text}</span></div>
-          <div class="detail-grid">
-            <div><div class="detail-label">Mentor</div><div class="detail-value">{r['mentor_ad_soyad']}</div></div>
-            <div><div class="detail-label">Vardiya Uyumu</div><div class="detail-value">{'✓ Uyumlu' if r['vardiya_uyumu'] else '⚠ Aksiyon Gerekli'}</div></div>
-            <div><div class="detail-label">TRN Başlangıcı</div><div class="detail-value">{r['kontuar_trn_baslangic']:%d.%m.%Y}</div></div>
-            <div><div class="detail-label">Hedef Release</div><div class="detail-value">{r['hedef_release_tarihi']:%d.%m.%Y} · {elapsed}. gün</div></div>
-          </div>
+        <div class="hero">
+            <div class="hero-row">
+                <div class="brand-badge">✈</div>
+                <div>
+                    <h1>İstasyon TRN Takip ve Değerlendirme Portalı</h1>
+                    <p>{subtitle}</p>
+                </div>
+            </div>
         </div>
         """,
         unsafe_allow_html=True,
     )
 
 
-# -----------------------------------------------------------------------------
-# Hızlı işlem sekmeleri
-# -----------------------------------------------------------------------------
-st.markdown('<div class="section-title">Hızlı İşlemler</div>', unsafe_allow_html=True)
-tab_new, tab_review, tab_bulk = st.tabs([
-    "＋ Yeni Personel Kaydı",
-    "✓ Mentor & Release Değerlendirme",
-    "⇧ Toplu Veri Yükleme",
-])
-
-with tab_new:
-    mentor_options = sorted({r["mentor_ad_soyad"] for r in records}) or ["Mentor Atanmadı"]
-    with st.form("new_person_form", clear_on_submit=True):
-        c1, c2 = st.columns(2)
-        with c1:
-            new_id = st.text_input("Sicil No *", placeholder="TR1250")
-            new_name = st.text_input("Ad Soyad *", placeholder="Ad Soyad")
-            class_start = st.date_input("3 Günlük Sınıf Eğitimi Başlangıcı", value=date.today())
-        with c2:
-            new_mentor = st.selectbox("Mentor", mentor_options)
-            new_compatible = st.checkbox("Mentor–menti vardiyası uyumlu", value=True)
-            new_start = st.date_input("Kontuar TRN Başlangıç Tarihi", value=date.today())
-        auto_target = new_start + timedelta(days=60)
-        st.markdown(f'<div class="hint">Otomatik hedef release tarihi: <b>{auto_target:%d.%m.%Y}</b></div>', unsafe_allow_html=True)
-        submitted = st.form_submit_button("Personeli Kaydet", type="primary", use_container_width=True)
-
-    if submitted:
-        clean_id, clean_name = new_id.strip().upper(), new_name.strip()
-        if not clean_id or not clean_name:
-            st.error("Sicil no ve ad soyad alanları zorunludur.")
-        elif any(r["sicil_no"].upper() == clean_id for r in records):
-            st.error("Bu sicil numarasıyla daha önce kayıt oluşturulmuş.")
-        else:
-            target, remaining = calculate_dates(new_start)
-            status = "Kontuar TRN (Devam Ediyor)" if new_compatible else "Aksiyon Gerekiyor"
-            st.session_state.personnel.append({
-                "sicil_no": clean_id,
-                "ad_soyad": clean_name,
-                "sinif_egitimi_tarihleri": f"{class_start:%d.%m.%Y} - {(class_start + timedelta(days=2)):%d.%m.%Y}",
-                "mentor_ad_soyad": new_mentor,
-                "vardiya_uyumu": new_compatible,
-                "kontuar_trn_baslangic": new_start,
-                "hedef_release_tarihi": target,
-                "kalan_gun": remaining,
-                "mentor_notu": "",
-                "lufthansa_release_aciklama": "",
-                "durum": status,
-            })
-            st.toast(f"{clean_name} başarıyla kaydedildi.", icon="✅")
-            st.rerun()
-
-with tab_review:
-    if not records:
-        st.info("Değerlendirilecek personel bulunmuyor.")
-    else:
-        labels = {f'{r["sicil_no"]} — {r["ad_soyad"]}': i for i, r in enumerate(records)}
-        selection = st.selectbox("Personel Seçimi", list(labels.keys()))
-        selected_index = labels[selection]
-        selected = records[selected_index]
-        eligible = selected["kalan_gun"] <= 0
-
-        i1, i2, i3 = st.columns(3)
-        i1.metric("TRN Başlangıcı", selected["kontuar_trn_baslangic"].strftime("%d.%m.%Y"))
-        i2.metric("Hedef Tarih", selected["hedef_release_tarihi"].strftime("%d.%m.%Y"))
-        i3.metric("Süre", "Uygun" if eligible else f'{selected["kalan_gun"]} gün kaldı')
-
-        with st.form("review_form"):
-            mentor_note = st.text_area("Mentor Notu", value=selected["mentor_notu"], height=110)
-            station_comment = st.text_area(
-                "Lufthansa İstasyon / Release Açıklaması",
-                value=selected["lufthansa_release_aciklama"],
-                height=110,
-            )
-            new_shift_fit = st.checkbox("Mentor–menti vardiyası uyumlu", value=selected["vardiya_uyumu"])
-            save_notes = st.form_submit_button("Değerlendirmeyi Kaydet", use_container_width=True)
-
-        if save_notes:
-            selected["mentor_notu"] = mentor_note.strip()
-            selected["lufthansa_release_aciklama"] = station_comment.strip()
-            selected["vardiya_uyumu"] = new_shift_fit
-            if not new_shift_fit and selected["durum"] != "Release Verildi":
-                selected["durum"] = "Aksiyon Gerekiyor"
-            st.toast("Değerlendirme güncellendi.", icon="✅")
-            st.rerun()
-
-        if not eligible:
-            st.warning(
-                f"Kural İhlali: Minimum 60 günlük kontuar süresi dolmadan release verilemez. "
-                f"Kalan: {selected['kalan_gun']} gün."
-            )
-        elif not selected["vardiya_uyumu"]:
-            st.warning("Release öncesinde mentor–menti vardiya uyum aksiyonu kapatılmalıdır.")
-
-        release_disabled = (not eligible) or (not selected["vardiya_uyumu"]) or selected["durum"] == "Release Verildi"
-        if st.button("✓ Nihai Release Onayla", type="primary", disabled=release_disabled, use_container_width=True):
-            selected["durum"] = "Release Verildi"
-            if not selected["lufthansa_release_aciklama"]:
-                selected["lufthansa_release_aciklama"] = f"Release {date.today():%d.%m.%Y} tarihinde onaylandı."
-            st.toast(f'{selected["ad_soyad"]} için release onaylandı.', icon="✅")
-            st.rerun()
-
-with tab_bulk:
+def render_metric(label, value, note, color):
+    """Özel tasarımlı KPI kartı oluşturur."""
     st.markdown(
-        '<div class="hint"><b>Gelecek entegrasyonu:</b> Standart şablonu doldurup CSV veya XLSX olarak yükleyebilirsiniz. '
-        'Sicil numarası mevcut olan satırlar mükerrer kayıt oluşmaması için atlanır.</div>',
+        f"""
+        <div class="metric-card" style="--accent:{color}">
+            <div class="metric-label">{label}</div>
+            <div class="metric-value">{value}</div>
+            <div class="metric-note">{note}</div>
+        </div>
+        """,
         unsafe_allow_html=True,
     )
-    template_columns = [
-        "sicil_no", "ad_soyad", "sinif_egitimi_tarihleri", "mentor_ad_soyad",
-        "vardiya_uyumu", "kontuar_trn_baslangic", "mentor_notu",
-        "lufthansa_release_aciklama", "durum",
-    ]
-    template_df = pd.DataFrame(columns=template_columns)
-    st.download_button(
-        "⬇ Toplu Veri Yükleme Şablonunu İndir",
-        data=template_df.to_csv(index=False, sep=";", encoding="utf-8-sig").encode("utf-8-sig"),
-        file_name="lufthansa_trn_yukleme_sablonu.csv",
-        mime="text/csv",
-        use_container_width=True,
+
+
+initialize_state()
+
+
+# =============================================================================
+# GİRİŞ VE MENTOR KAYIT EKRANI
+# =============================================================================
+def authentication_page():
+    render_header(
+        "Yolcu Hizmetleri On-the-Job Training süreçleri için "
+        "güvenli operasyon portalı"
     )
-    uploaded = st.file_uploader("CSV / Excel Dosyası Seç", type=["csv", "xlsx", "xls"])
-    if uploaded is not None:
-        try:
-            if uploaded.name.lower().endswith(".csv"):
-                try:
-                    incoming = pd.read_csv(uploaded, sep=None, engine="python")
-                except UnicodeDecodeError:
-                    uploaded.seek(0)
-                    incoming = pd.read_csv(uploaded, sep=None, engine="python", encoding="latin-1")
-            else:
-                incoming = pd.read_excel(uploaded)
 
-            missing = [c for c in template_columns[:6] if c not in incoming.columns]
-            if missing:
-                st.error("Eksik zorunlu sütunlar: " + ", ".join(missing))
-            else:
-                st.dataframe(incoming.head(20), use_container_width=True, hide_index=True)
-                if st.button("Dosyadaki Kayıtları Listeye Ekle", type="primary", use_container_width=True):
-                    known_ids = {r["sicil_no"].upper() for r in records}
-                    added, skipped = 0, 0
-                    for _, row in incoming.iterrows():
-                        sicil = str(row.get("sicil_no", "")).strip().upper()
-                        name = str(row.get("ad_soyad", "")).strip()
-                        if not sicil or not name or sicil in known_ids:
-                            skipped += 1
-                            continue
-                        start = pd.to_datetime(row["kontuar_trn_baslangic"], dayfirst=True).date()
-                        target, remaining = calculate_dates(start)
-                        raw_fit = str(row.get("vardiya_uyumu", "")).strip().casefold()
-                        fit = raw_fit in {"true", "1", "evet", "uyumlu", "yes"}
-                        status = str(row.get("durum", "Kontuar TRN (Devam Ediyor)")).strip()
-                        if status not in STATUSES:
-                            status = "Kontuar TRN (Devam Ediyor)" if fit else "Aksiyon Gerekiyor"
-                        records.append({
-                            "sicil_no": sicil,
-                            "ad_soyad": name,
-                            "sinif_egitimi_tarihleri": str(row.get("sinif_egitimi_tarihleri", "")),
-                            "mentor_ad_soyad": str(row.get("mentor_ad_soyad", "Atanmadı")),
-                            "vardiya_uyumu": fit,
-                            "kontuar_trn_baslangic": start,
-                            "hedef_release_tarihi": target,
-                            "kalan_gun": remaining,
-                            "mentor_notu": "" if pd.isna(row.get("mentor_notu")) else str(row.get("mentor_notu", "")),
-                            "lufthansa_release_aciklama": "" if pd.isna(row.get("lufthansa_release_aciklama")) else str(row.get("lufthansa_release_aciklama", "")),
-                            "durum": status,
-                        })
-                        known_ids.add(sicil)
-                        added += 1
-                    st.toast(f"{added} kayıt eklendi, {skipped} kayıt atlandı.", icon="✅")
+    st.markdown(
+        '<div class="login-wrap">',
+        unsafe_allow_html=True,
+    )
+
+    st.markdown(
+        '<div class="eyebrow">Yetkilendirilmiş Erişim</div>',
+        unsafe_allow_html=True,
+    )
+
+    login_tab, signup_tab = st.tabs(
+        [
+            "Giriş Yap",
+            "Mentor Hesabı Oluştur",
+        ]
+    )
+
+    with login_tab:
+        role_choice = st.radio(
+            "Giriş profili",
+            ["Mentor", "Yetkili / Şef"],
+            horizontal=True,
+            key="login_role_choice",
+        )
+
+        if role_choice == "Mentor":
+            with st.form("mentor_login"):
+                username = st.text_input(
+                    "Kullanıcı Adı",
+                    placeholder="ad.soyad",
+                )
+
+                password = st.text_input(
+                    "Şifre",
+                    type="password",
+                )
+
+                submitted = st.form_submit_button(
+                    "Mentor Girişi",
+                    type="primary",
+                    use_container_width=True,
+                )
+
+            if submitted:
+                key = username.strip().lower()
+                user = st.session_state.users.get(key)
+
+                if user and user["password"] == password:
+                    st.session_state.authenticated = True
+                    st.session_state.role = "mentor"
+                    st.session_state.username = key
+                    st.session_state.full_name = user["full_name"]
+
+                    st.toast(
+                        "Giriş başarılı.",
+                        icon="✅",
+                    )
                     st.rerun()
-        except ImportError:
-            st.error("Excel dosyasını okumak için ortamda Excel motoru bulunmuyor. Dosyayı CSV olarak kaydedip tekrar yükleyin.")
-        except Exception as exc:
-            st.error(f"Dosya okunamadı: {exc}")
 
-st.caption("Lufthansa TRN Portalı · Operasyonel prototip · Minimum kontuar eğitim süresi: 60 gün")
+                else:
+                    st.error(
+                        "Kullanıcı adı veya şifre hatalı."
+                    )
+
+            st.markdown(
+                """
+                <div class="demo-box">
+                    <b>Demo mentor:</b> selin.kaya
+                    &nbsp;·&nbsp;
+                    <b>Şifre:</b> mentor123
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+
+        else:
+            with st.form("admin_login"):
+                admin_password = st.text_input(
+                    "Yetkili / Şef Parolası",
+                    type="password",
+                )
+
+                submitted = st.form_submit_button(
+                    "Yetkili Konsoluna Gir",
+                    type="primary",
+                    use_container_width=True,
+                )
+
+            if submitted:
+                if admin_password == ADMIN_PASSWORD:
+                    st.session_state.authenticated = True
+                    st.session_state.role = "admin"
+                    st.session_state.username = "admin"
+                    st.session_state.full_name = "Yetkili / Şef"
+
+                    st.toast(
+                        "Yetkili girişi başarılı.",
+                        icon="✅",
+                    )
+                    st.rerun()
+
+                else:
+                    st.error(
+                        "Yetkili parolası hatalı."
+                    )
+
+            st.markdown(
+                """
+                <div class="demo-box">
+                    <b>Demo yetkili parolası:</b> chef2026
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+
+    with signup_tab:
+        with st.form(
+            "mentor_signup",
+            clear_on_submit=True,
+        ):
+            full_name = st.text_input(
+                "Ad Soyad *",
+                placeholder="Ad Soyad",
+            )
+
+            new_username = st.text_input(
+                "Kullanıcı Adı *",
+                placeholder="ad.soyad",
+            )
+
+            column1, column2 = st.columns(2)
+
+            with column1:
+                new_password = st.text_input(
+                    "Şifre *",
+                    type="password",
+                )
+
+            with column2:
+                confirm_password = st.text_input(
+                    "Şifre Tekrar *",
+                    type="password",
+                )
+
+            accepted = st.checkbox(
+                "Bilgilerimin bu prototip oturumunda "
+                "saklanmasını kabul ediyorum."
+            )
+
+            created = st.form_submit_button(
+                "Mentor Hesabı Oluştur",
+                type="primary",
+                use_container_width=True,
+            )
+
+        if created:
+            key = new_username.strip().lower()
+
+            if (
+                not full_name.strip()
+                or not key
+                or not new_password
+            ):
+                st.error(
+                    "Tüm zorunlu alanları doldurun."
+                )
+
+            elif " " in key:
+                st.error(
+                    "Kullanıcı adında boşluk kullanılamaz."
+                )
+
+            elif key in st.session_state.users:
+                st.error(
+                    "Bu kullanıcı adı zaten kayıtlı."
+                )
+
+            elif len(new_password) < 6:
+                st.error(
+                    "Şifre en az 6 karakter olmalıdır."
+                )
+
+            elif new_password != confirm_password:
+                st.error(
+                    "Şifreler eşleşmiyor."
+                )
+
+            elif not accepted:
+                st.error(
+                    "Devam etmek için oturum içi saklama "
+                    "onayını işaretleyin."
+                )
+
+            else:
+                st.session_state.users[key] = {
+                    "password": new_password,
+                    "full_name": full_name.strip(),
+                }
+
+                st.success(
+                    "Mentor hesabı oluşturuldu. "
+                    "Giriş sekmesinden oturum açabilirsiniz."
+                )
+
+    st.markdown(
+        "</div>",
+        unsafe_allow_html=True,
+    )
+
+
+# =============================================================================
+# MENTOR PANELİ
+# =============================================================================
+def mentor_panel():
+    username = st.session_state.username
+    full_name = st.session_state.full_name
+
+    render_header(
+        f"Mentor Paneli · Hoş geldiniz, {full_name}"
+    )
+
+    top1, top2, top3 = st.columns([2, 1, 1])
+
+    with top1:
+        st.markdown(
+            f"""
+            <div class="info-card">
+                <div class="info-label">Aktif Kullanıcı</div>
+                <div class="info-value">{full_name}</div>
+                <div class="subtle">Mentor yetkisi</div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
+    with top2:
+        my_count = sum(
+            record["mentor_kullanici"] == username
+            for record in st.session_state.evaluations
+        )
+
+        render_metric(
+            "Kayıtlarım",
+            my_count,
+            "Toplam değerlendirme",
+            "#315AAB",
+        )
+
+    with top3:
+        if st.button(
+            "Güvenli Çıkış",
+            use_container_width=True,
+        ):
+            logout()
+            st.rerun()
+
+    assigned = [
+        trainee
+        for trainee in st.session_state.trainees
+        if trainee["mentor"] == username
+    ]
+
+    if not assigned:
+        st.info(
+            "Henüz hesabınıza atanmış bir TRN personeli bulunmuyor. "
+            "Yetkiliyle iletişime geçin."
+        )
+        return
+
+    new_tab, history_tab, edit_tab = st.tabs(
+        [
+            "＋ Hızlı Uçuş Değerlendirmesi",
+            "Geçmiş Kayıtlarım",
+            "✎ Kayıt Düzenle",
+        ]
+    )
+
+    with new_tab:
+        st.markdown(
+            '<div class="section-title">'
+            "Yeni Operasyon Değerlendirmesi"
+            "</div>",
+            unsafe_allow_html=True,
+        )
+
+        with st.form(
+            "new_evaluation",
+            clear_on_submit=True,
+        ):
+            column1, column2 = st.columns(2)
+
+            with column1:
+                trainee_choice = st.selectbox(
+                    "TRN Personeli *",
+                    [
+                        trainee_label(trainee)
+                        for trainee in assigned
+                    ],
+                )
+
+                operation_date = st.date_input(
+                    "Operasyon Tarihi *",
+                    value=date.today(),
+                    max_value=date.today(),
+                )
+
+                shift = st.selectbox(
+                    "Vardiya *",
+                    SHIFTS,
+                )
+
+                flight = st.selectbox(
+                    "IST Çıkışlı Uçuş / Uçak *",
+                    FLIGHTS,
+                )
+
+            with column2:
+                duty = st.selectbox(
+                    "Görev / Eğitim Alanı *",
+                    DUTIES,
+                )
+
+                score = st.slider(
+                    "Mentor Puanı",
+                    min_value=1,
+                    max_value=5,
+                    value=3,
+                )
+
+                competency = st.selectbox(
+                    "Yetkinlik Seviyesi *",
+                    COMPETENCIES,
+                )
+
+                process_status = st.selectbox(
+                    "İstasyon Süreç Durumu *",
+                    PROCESS_STATUSES,
+                )
+
+            note = st.text_area(
+                "Detaylı Mentor Değerlendirme Notu *",
+                placeholder=(
+                    "Gözlenen güçlü yönleri ve geliştirilmesi "
+                    "gereken noktaları yazın..."
+                ),
+                height=110,
+            )
+
+            actions = st.text_area(
+                "Aksiyon Maddeleri",
+                placeholder=(
+                    "Sonraki uçuşta uygulanacak takip veya "
+                    "eğitim aksiyonları..."
+                ),
+                height=90,
+            )
+
+            saved = st.form_submit_button(
+                "Değerlendirmeyi Kaydet",
+                type="primary",
+                use_container_width=True,
+            )
+
+        if saved:
+            if len(note.strip()) < 10:
+                st.error(
+                    "Değerlendirme notu en az 10 karakter olmalıdır."
+                )
+
+            else:
+                selected_trainee = next(
+                    trainee
+                    for trainee in assigned
+                    if trainee_label(trainee) == trainee_choice
+                )
+
+                now_text = datetime.now().strftime(
+                    "%Y-%m-%d %H:%M:%S"
+                )
+
+                st.session_state.evaluations.append(
+                    {
+                        "kayit_id": make_record_id(),
+                        "zaman_damgasi": now_text,
+                        "mentor_kullanici": username,
+                        "mentor_ad_soyad": full_name,
+                        "trn_sicil": selected_trainee["code"],
+                        "trn_ad_soyad": selected_trainee["name"],
+                        "operasyon_tarihi": operation_date,
+                        "vardiya": shift,
+                        "ucus_bilgisi": flight,
+                        "gorev_alani": duty,
+                        "mentor_puani": score,
+                        "yetkinlik_seviyesi": competency,
+                        "degerlendirme_notu": note.strip(),
+                        "aksiyon_maddeleri": actions.strip(),
+                        "surec_durumu": process_status,
+                        "son_guncelleme": now_text,
+                    }
+                )
+
+                selected_trainee["status"] = process_status
+
+                st.toast(
+                    "Uçuş değerlendirmesi başarıyla kaydedildi.",
+                    icon="✅",
+                )
+                st.rerun()
+
+    with history_tab:
+        my_records = [
+            record
+            for record in st.session_state.evaluations
+            if record["mentor_kullanici"] == username
+        ]
+
+        if not my_records:
+            st.info(
+                "Henüz değerlendirme kaydınız bulunmuyor."
+            )
+
+        else:
+            display_df = evaluations_dataframe(
+                my_records
+            ).rename(
+                columns={
+                    "operasyon_tarihi": "Tarih",
+                    "trn_sicil": "Sicil",
+                    "trn_ad_soyad": "TRN Personeli",
+                    "ucus_bilgisi": "Uçuş",
+                    "gorev_alani": "Görev",
+                    "mentor_puani": "Puan",
+                    "yetkinlik_seviyesi": "Yetkinlik",
+                    "surec_durumu": "Süreç",
+                }
+            )
+
+            st.dataframe(
+                display_df[
+                    [
+                        "Tarih",
+                        "Sicil",
+                        "TRN Personeli",
+                        "Uçuş",
+                        "Görev",
+                        "Puan",
+                        "Yetkinlik",
+                        "Süreç",
+                    ]
+                ],
+                use_container_width=True,
+                hide_index=True,
+            )
+
+            st.download_button(
+                "Kendi Kayıtlarımı CSV / Excel Uyumlu İndir",
+                data=csv_bytes(my_records),
+                file_name=(
+                    f"mentor_degerlendirmeleri_"
+                    f"{username}_{date.today():%Y%m%d}.csv"
+                ),
+                mime="text/csv",
+                use_container_width=True,
+            )
+
+    with edit_tab:
+        my_records = [
+            record
+            for record in st.session_state.evaluations
+            if record["mentor_kullanici"] == username
+        ]
+
+        if not my_records:
+            st.info(
+                "Düzenlenebilecek kayıt bulunmuyor."
+            )
+
+        else:
+            options = {
+                (
+                    f"{record['operasyon_tarihi']:%d.%m.%Y} · "
+                    f"{record['trn_sicil']} · "
+                    f"{record['ucus_bilgisi']} · "
+                    f"{record['kayit_id']}"
+                ): record
+                for record in sorted(
+                    my_records,
+                    key=lambda item: item["zaman_damgasi"],
+                    reverse=True,
+                )
+            }
+
+            selected_label = st.selectbox(
+                "Düzenlenecek Kayıt",
+                list(options.keys()),
+            )
+
+            selected = options[selected_label]
+
+            with st.form("edit_evaluation"):
+                column1, column2 = st.columns(2)
+
+                with column1:
+                    edit_score = st.slider(
+                        "Mentor Puanı",
+                        1,
+                        5,
+                        int(selected["mentor_puani"]),
+                    )
+
+                    edit_competency = st.selectbox(
+                        "Yetkinlik Seviyesi",
+                        COMPETENCIES,
+                        index=COMPETENCIES.index(
+                            selected["yetkinlik_seviyesi"]
+                        ),
+                    )
+
+                with column2:
+                    edit_status = st.selectbox(
+                        "Süreç Durumu",
+                        PROCESS_STATUSES,
+                        index=PROCESS_STATUSES.index(
+                            selected["surec_durumu"]
+                        ),
+                    )
+
+                edit_note = st.text_area(
+                    "Değerlendirme Notu",
+                    value=selected["degerlendirme_notu"],
+                    height=110,
+                )
+
+                edit_actions = st.text_area(
+                    "Aksiyon Maddeleri",
+                    value=selected["aksiyon_maddeleri"],
+                    height=90,
+                )
+
+                updated = st.form_submit_button(
+                    "Değişiklikleri Kaydet",
+                    type="primary",
+                    use_container_width=True,
+                )
+
+            if updated:
+                if len(edit_note.strip()) < 10:
+                    st.error(
+                        "Değerlendirme notu en az 10 karakter olmalıdır."
+                    )
+
+                else:
+                    selected["mentor_puani"] = edit_score
+                    selected["yetkinlik_seviyesi"] = edit_competency
+                    selected["surec_durumu"] = edit_status
+                    selected["degerlendirme_notu"] = edit_note.strip()
+                    selected["aksiyon_maddeleri"] = edit_actions.strip()
+                    selected["son_guncelleme"] = (
+                        datetime.now().strftime(
+                            "%Y-%m-%d %H:%M:%S"
+                        )
+                    )
+
+                    st.toast(
+                        "Kayıt güncellendi.",
+                        icon="✅",
+                    )
+                    st.rerun()
+
+
+# =============================================================================
+# YETKİLİ / ŞEF KONSOLU
+# =============================================================================
+def admin_console():
+    render_header(
+        "Yetkili / Şef Konsolu · Tüm istasyon eğitim "
+        "performansının merkezi görünümü"
+    )
+
+    records = st.session_state.evaluations
+
+    exit_column, spacer = st.columns([1, 4])
+
+    with exit_column:
+        if st.button(
+            "Güvenli Çıkış",
+            use_container_width=True,
+        ):
+            logout()
+            st.rerun()
+
+    unique_trainees = {
+        record["trn_sicil"]
+        for record in records
+    }
+
+    critical_count = sum(
+        record["yetkinlik_seviyesi"] == "Kritik Hata"
+        or int(record["mentor_puani"]) <= 1
+        for record in records
+    )
+
+    if records:
+        flight_counts = pd.Series(
+            [
+                record["trn_ad_soyad"]
+                for record in records
+            ]
+        ).value_counts()
+    else:
+        flight_counts = pd.Series(dtype=int)
+
+    if not flight_counts.empty:
+        leader = flight_counts.index[0]
+        leader_count = int(flight_counts.iloc[0])
+    else:
+        leader = "—"
+        leader_count = 0
+
+    kpi_columns = st.columns(4)
+
+    kpis = [
+        (
+            "Toplam Değerlendirme",
+            len(records),
+            "Tüm kayıtlar",
+            "#315AAB",
+        ),
+        (
+            "Aktif TRN",
+            len(unique_trainees),
+            "Değerlendirilen personel",
+            "#FFAC00",
+        ),
+        (
+            "Kritik Not",
+            critical_count,
+            "Acil takip gerektiren",
+            "#C93F49",
+        ),
+        (
+            "En Çok Uçuşa Giren",
+            leader,
+            f"{leader_count} değerlendirme",
+            "#16845B",
+        ),
+    ]
+
+    for column, item in zip(kpi_columns, kpis):
+        with column:
+            render_metric(*item)
+
+    dashboard_tab, audit_tab, tools_tab = st.tabs(
+        [
+            "Analitik & Filtreler",
+            "Denetim Tablosu",
+            "Yönetim Araçları",
+        ]
+    )
+
+    with dashboard_tab:
+        st.markdown(
+            '<div class="section-title">'
+            "Gelişmiş Filtreleme"
+            "</div>",
+            unsafe_allow_html=True,
+        )
+
+        mentor_names = sorted(
+            {
+                record["mentor_ad_soyad"]
+                for record in records
+            }
+        )
+
+        trainee_names = sorted(
+            {
+                (
+                    f"{record['trn_sicil']} - "
+                    f"{record['trn_ad_soyad']}"
+                )
+                for record in records
+            }
+        )
+
+        flight_names = sorted(
+            {
+                record["ucus_bilgisi"]
+                for record in records
+            }
+        )
+
+        filter1, filter2, filter3 = st.columns(3)
+
+        with filter1:
+            search = st.text_input(
+                "Anlık Arama",
+                placeholder=(
+                    "Mentor, sicil, personel, uçuş..."
+                ),
+            )
+
+            selected_mentors = st.multiselect(
+                "Mentor",
+                mentor_names,
+            )
+
+        with filter2:
+            selected_trainees = st.multiselect(
+                "TRN Personeli",
+                trainee_names,
+            )
+
+            selected_flights = st.multiselect(
+                "Uçuş",
+                flight_names,
+            )
+
+        with filter3:
+            default_start = min(
+                (
+                    record["operasyon_tarihi"]
+                    for record in records
+                ),
+                default=date.today(),
+            )
+
+            start_date = st.date_input(
+                "Başlangıç Tarihi",
+                value=default_start,
+            )
+
+            end_date = st.date_input(
+                "Bitiş Tarihi",
+                value=date.today(),
+            )
+
+        query = search.strip().casefold()
+        filtered = []
+
+        for record in records:
+            joined = " ".join(
+                [
+                    record["mentor_ad_soyad"],
+                    record["trn_sicil"],
+                    record["trn_ad_soyad"],
+                    record["ucus_bilgisi"],
+                    record["gorev_alani"],
+                    record["degerlendirme_notu"],
+                ]
+            ).casefold()
+
+            trainee_full = (
+                f"{record['trn_sicil']} - "
+                f"{record['trn_ad_soyad']}"
+            )
+
+            if query and query not in joined:
+                continue
+
+            if (
+                selected_mentors
+                and record["mentor_ad_soyad"]
+                not in selected_mentors
+            ):
+                continue
+
+            if (
+                selected_trainees
+                and trainee_full
+                not in selected_trainees
+            ):
+                continue
+
+            if (
+                selected_flights
+                and record["ucus_bilgisi"]
+                not in selected_flights
+            ):
+                continue
+
+            if not (
+                start_date
+                <= record["operasyon_tarihi"]
+                <= end_date
+            ):
+                continue
+
+            filtered.append(record)
+
+        st.caption(
+            f"{len(filtered)} değerlendirme gösteriliyor"
+        )
+
+        if filtered:
+            filtered_df = evaluations_dataframe(
+                filtered
+            )
+
+            summary = (
+                filtered_df
+                .groupby(
+                    [
+                        "trn_sicil",
+                        "trn_ad_soyad",
+                    ],
+                    as_index=False,
+                )
+                .agg(
+                    degerlendirme_sayisi=(
+                        "kayit_id",
+                        "count",
+                    ),
+                    ortalama_puan=(
+                        "mentor_puani",
+                        "mean",
+                    ),
+                )
+                .sort_values(
+                    [
+                        "degerlendirme_sayisi",
+                        "ortalama_puan",
+                    ],
+                    ascending=[False, False],
+                )
+            )
+
+            summary["ortalama_puan"] = (
+                summary["ortalama_puan"].round(2)
+            )
+
+            st.markdown(
+                '<div class="section-title">'
+                "TRN Performans Özeti"
+                "</div>",
+                unsafe_allow_html=True,
+            )
+
+            st.dataframe(
+                summary.rename(
+                    columns={
+                        "trn_sicil": "Sicil",
+                        "trn_ad_soyad": "TRN Personeli",
+                        "degerlendirme_sayisi": "Uçuş / Kayıt",
+                        "ortalama_puan": "Ortalama Puan",
+                    }
+                ),
+                use_container_width=True,
+                hide_index=True,
+            )
+
+            score_summary = (
+                filtered_df
+                .groupby(
+                    "mentor_ad_soyad",
+                    as_index=False,
+                )
+                .agg(
+                    kayit_sayisi=(
+                        "kayit_id",
+                        "count",
+                    ),
+                    ortalama_puan=(
+                        "mentor_puani",
+                        "mean",
+                    ),
+                )
+            )
+
+            score_summary["ortalama_puan"] = (
+                score_summary["ortalama_puan"].round(2)
+            )
+
+            st.markdown(
+                '<div class="section-title">'
+                "Mentor Aktivite Özeti"
+                "</div>",
+                unsafe_allow_html=True,
+            )
+
+            st.dataframe(
+                score_summary.rename(
+                    columns={
+                        "mentor_ad_soyad": "Mentor",
+                        "kayit_sayisi": "Kayıt Sayısı",
+                        "ortalama_puan": "Ortalama Puan",
+                    }
+                ),
+                use_container_width=True,
+                hide_index=True,
+            )
+
+        else:
+            st.info(
+                "Seçilen filtrelere uygun kayıt bulunamadı."
+            )
+
+    with audit_tab:
+        st.markdown(
+            '<div class="section-title">'
+            "Kronolojik Denetim Kaydı"
+            "</div>",
+            unsafe_allow_html=True,
+        )
+
+        if not records:
+            st.info(
+                "Denetim kaydı bulunmuyor."
+            )
+
+        else:
+            audit_df = evaluations_dataframe(
+                records
+            ).rename(
+                columns={
+                    "kayit_id": "Kayıt ID",
+                    "zaman_damgasi": "Oluşturma",
+                    "mentor_ad_soyad": "Mentor",
+                    "trn_sicil": "Sicil",
+                    "trn_ad_soyad": "TRN Personeli",
+                    "operasyon_tarihi": "Tarih",
+                    "vardiya": "Vardiya",
+                    "ucus_bilgisi": "Uçuş / Uçak",
+                    "gorev_alani": "Görev",
+                    "mentor_puani": "Puan",
+                    "yetkinlik_seviyesi": "Yetkinlik",
+                    "degerlendirme_notu": "Mentor Notu",
+                    "aksiyon_maddeleri": "Aksiyon",
+                    "surec_durumu": "Süreç",
+                    "son_guncelleme": "Son Güncelleme",
+                }
+            )
+
+            visible_columns = [
+                "Kayıt ID",
+                "Tarih",
+                "Mentor",
+                "Sicil",
+                "TRN Personeli",
+                "Vardiya",
+                "Uçuş / Uçak",
+                "Görev",
+                "Puan",
+                "Yetkinlik",
+                "Mentor Notu",
+                "Aksiyon",
+                "Süreç",
+                "Son Güncelleme",
+            ]
+
+            st.dataframe(
+                audit_df[visible_columns],
+                use_container_width=True,
+                hide_index=True,
+                height=450,
+            )
+
+            record_options = {
+                (
+                    f"{record['operasyon_tarihi']:%d.%m.%Y} · "
+                    f"{record['mentor_ad_soyad']} · "
+                    f"{record['trn_sicil']} · "
+                    f"{record['kayit_id']}"
+                ): record
+                for record in sorted(
+                    records,
+                    key=lambda item: item["zaman_damgasi"],
+                    reverse=True,
+                )
+            }
+
+            chosen = st.selectbox(
+                "Detayını Görüntüle",
+                list(record_options.keys()),
+            )
+
+            detail = record_options[chosen]
+
+            detail1, detail2, detail3 = st.columns(3)
+
+            detail1.metric(
+                "Mentor",
+                detail["mentor_ad_soyad"],
+            )
+
+            detail2.metric(
+                "TRN Personeli",
+                (
+                    f"{detail['trn_sicil']} - "
+                    f"{detail['trn_ad_soyad']}"
+                ),
+            )
+
+            detail3.metric(
+                "Puan",
+                f"{detail['mentor_puani']} / 5",
+            )
+
+            st.markdown(
+                f"""
+                <div class="audit-note">
+                    <b>Değerlendirme:</b><br>
+                    {detail["degerlendirme_notu"]}
+                    <br><br>
+                    <b>Aksiyon:</b><br>
+                    {
+                        detail["aksiyon_maddeleri"]
+                        or "Aksiyon girilmedi."
+                    }
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+
+    with tools_tab:
+        st.markdown(
+            '<div class="section-title">'
+            "Raporlama ve Test Verisi Yönetimi"
+            "</div>",
+            unsafe_allow_html=True,
+        )
+
+        st.markdown(
+            """
+            <div class="hint">
+                Dışa aktarılan UTF-8 CSV dosyası Excel ile
+                doğrudan açılabilir. Sıfırlama işlemi mevcut
+                oturumdaki kayıtları örnek veri setine döndürür.
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
+        tool1, tool2 = st.columns(2)
+
+        with tool1:
+            st.download_button(
+                "Tüm Değerlendirme Raporunu İndir",
+                data=csv_bytes(records),
+                file_name=(
+                    "istasyon_trn_tum_rapor_"
+                    f"{date.today():%Y%m%d}.csv"
+                ),
+                mime="text/csv",
+                use_container_width=True,
+            )
+
+        with tool2:
+            if st.button(
+                "Verileri Sıfırla / Örnek Verileri Yükle",
+                use_container_width=True,
+            ):
+                reset_demo_data()
+
+                st.toast(
+                    "Örnek veriler yeniden yüklendi.",
+                    icon="✅",
+                )
+                st.rerun()
+
+        st.markdown(
+            '<div class="section-title">'
+            "Mentor Hesapları ve Atamalar"
+            "</div>",
+            unsafe_allow_html=True,
+        )
+
+        accounts = []
+
+        for username, user in st.session_state.users.items():
+            assigned_names = [
+                trainee_label(trainee)
+                for trainee in st.session_state.trainees
+                if trainee["mentor"] == username
+            ]
+
+            accounts.append(
+                {
+                    "Kullanıcı Adı": username,
+                    "Mentor": user["full_name"],
+                    "Atanan TRN Sayısı": len(assigned_names),
+                    "Atanan Personel": (
+                        ", ".join(assigned_names)
+                        or "Atama yok"
+                    ),
+                }
+            )
+
+        st.dataframe(
+            pd.DataFrame(accounts),
+            use_container_width=True,
+            hide_index=True,
+        )
+
+
+# =============================================================================
+# ROL BAZLI UYGULAMA YÖNLENDİRMESİ
+# =============================================================================
+if not st.session_state.authenticated:
+    authentication_page()
+
+elif st.session_state.role == "mentor":
+    mentor_panel()
+
+elif st.session_state.role == "admin":
+    admin_console()
+
+else:
+    logout()
+    st.rerun()
+
+
+st.caption(
+    "İstasyon TRN Portalı · Operasyonel prototip · "
+    "Veriler aktif oturumda saklanır"
+)
